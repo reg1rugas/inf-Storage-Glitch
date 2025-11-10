@@ -6,8 +6,6 @@ import imageio
 import filetype
 from PIL import Image
 from moviepy import ImageSequenceClip
-from PIL import Image
-from moviepy import ImageSequenceClip
 import yt_dlp
 
 
