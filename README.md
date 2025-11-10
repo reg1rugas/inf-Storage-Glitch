@@ -27,7 +27,7 @@ python converter.py --file demo.zip
 then upload the generated video to your youtube channel and download it back for retrieval by
 
 ```bash
-# Decode
+# Download
 python converter.py --download https://www.youtube.com/watch?v=q0MEYLTetYA
 ```
 
