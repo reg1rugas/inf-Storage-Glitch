@@ -1,11 +1,15 @@
-from PIL import Image
-from moviepy import ImageSequenceClip
 import argparse
-import magic
 import io
 import numpy as np
 from tqdm import tqdm
 import imageio
+import filetype
+from PIL import Image
+from moviepy import ImageSequenceClip
+from PIL import Image
+from moviepy import ImageSequenceClip
+import yt_dlp
+
 
 WIDTH=1920
 HEIGHT=1080
@@ -105,10 +109,12 @@ def video_to_file(path, width=WIDTH, height=HEIGHT, pixel_size=PIXEL_SIZE):
                     else:
                         binary_digits += '0'
 
+        if len(binary_digits) % 8 != 0:
+            binary_digits = binary_digits.ljust(((len(binary_digits) + 7) // 8) * 8, '0')
 
         binary_data = bytes(int(binary_digits[i:i+8], 2) for i in range(0, len(binary_digits), 8))
 
-        l = magic.from_buffer(binary_data, mime=True)
+        l = filetype.guess(binary_data).mime
         ext = l.split(sep='/')[-1]
 
         with open(f'result.{ext}', 'wb') as f:   # incase of zip it is saved as .octet-stream due to python-magic being dumb
@@ -120,24 +126,36 @@ def video_to_file(path, width=WIDTH, height=HEIGHT, pixel_size=PIXEL_SIZE):
         print(f"Error: The file '{path}' was not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
+
+
+def download_video(url, output_path="."):
+    ydl_opts = {
+        'outtmpl': f'{output_path}/%(title)s.%(ext)s',
+        'format': 'bestvideo[ext=mp4]/bestvideo',    # pick best video stream only (no audio, no merging)
+        'merge_output_format': None,
+        'postprocessors': [],
+        'quiet': False
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
     
 
 if __name__ == "__main__":
-
+    
     parser = argparse.ArgumentParser(prog='converter')
     parser.add_argument('-f', '--file', help="Convert file to video")  
     parser.add_argument('-v', '--video', help="Convert video to file")  
+    parser.add_argument('-d', '--download', help="Download YT video from link")  
     args = parser.parse_args()
 
-    if not (args.file or args.video):
+    if not (args.file or args.video or args.download):
         parser.error("Missing arguements :(")
-
-    path = args.file if args.file else args.video
 
     if args.file:
         file_to_video(args.file)
     elif args.video:
         video_to_file(args.video)
-    
-
+    else:
+        download_video(args.download)  #Sample : https://www.youtube.com/watch?v=q0MEYLTetYA
 
