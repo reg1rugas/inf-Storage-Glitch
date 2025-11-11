@@ -1,2 +1,3 @@
-python-magic
+filetype
 moviepy
+yt-dlp
